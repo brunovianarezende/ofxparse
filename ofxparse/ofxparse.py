@@ -290,6 +290,7 @@ class Transaction(object):
         self.sic = None
         self.mcc = ''
         self.checknum = ''
+        self.refnum = None
 
     def __repr__(self):
         return "<Transaction units=" + str(self.amount) + ">"
@@ -885,5 +886,12 @@ class OfxParser(object):
                 transaction.checknum = checknum_tag.contents[0].strip()
             except IndexError:
                 raise OfxParserException(six.u("Empty Check (or other reference) number"))
+
+        refnum_tag = txn_ofx.find('refnum')
+        if hasattr(refnum_tag, 'contents'):
+            try:
+                transaction.refnum = refnum_tag.contents[0].strip()
+            except IndexError:
+                raise OfxParserException(six.u("Empty reference number"))
 
         return transaction

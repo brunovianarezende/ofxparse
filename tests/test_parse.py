@@ -425,6 +425,7 @@ class TestParseTransaction(TestCase):
         self.assertEquals('0000123456782009040100001', transaction.id)
         self.assertEquals("MCDONALD'S #112", transaction.payee)
         self.assertEquals("POS MERCHANDISE;MCDONALD'S #112", transaction.memo)
+        self.assertIsNone(transaction.refnum)
 
 
     def testThatParseTransactionWithFieldCheckNum(self):
@@ -441,6 +442,23 @@ class TestParseTransaction(TestCase):
         txn = soup_maker(input)
         transaction = OfxParser.parseTransaction(txn.find('stmttrn'))
         self.assertEquals('700', transaction.checknum)
+
+    def testThatParseTransactionWithFieldRefNum(self):
+        input = '''
+<STMTTRN>
+ <TRNTYPE>POS
+ <DTPOSTED>20090401122017.000[-5:EST]
+ <TRNAMT>-6.60
+ <FITID>0000123456782009040100001
+ <NAME>MCDONALD'S #112
+ <MEMO>POS MERCHANDISE;MCDONALD'S #112
+ <REFNUM>123.456
+</STMTTRN>
+'''
+        txn = soup_maker(input)
+        transaction = OfxParser.parseTransaction(txn.find('stmttrn'))
+        self.assertEquals("123.456", transaction.refnum)
+
 
 class TestTransaction(TestCase):
     def testThatAnEmptyTransactionIsValid(self):
